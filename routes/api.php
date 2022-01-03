@@ -19,6 +19,7 @@ Route::group([
         Route::get('user', 'RegisterController@user');
         Route::get('todolist', 'TodoModelController@todolist');
         Route::post('addtodolist', 'TodoModelController@addtodolist');
+        Route::post('updatetodolist', 'TodoModelController@updatetodolist');
     });
 });
 

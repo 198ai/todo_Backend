@@ -10,16 +10,16 @@ use Illuminate\Support\Facades\Auth;
 class RegisterController extends Controller
 {
     //用户注册
-    public function register(RegisterUserRequest $request){
-        $user =User::Create([
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'password'=>bcrypt($request->password)
-        ]);
-        return response()->json([
-            'data'=>$user
-        ],201);
-    }
+    // public function register(RegisterUserRequest $request){
+    //     $user =User::Create([
+    //         'name'=>$request->name,
+    //         'email'=>$request->email,
+    //         'password'=>bcrypt($request->password)
+    //     ]);
+    //     return response()->json([
+    //         'data'=>$user
+    //     ],201)->header('Content-Type','application/json; charset=UTF-8');
+    // }
     public function signup(Request $request)
     {
         $request->validate([
@@ -60,7 +60,7 @@ class RegisterController extends Controller
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString()
-            ],201);
+            ],201)->header('Content-Type','application/json; charset=UTF-8');
         // return response()->json([
         //     'message' => 'Successfully created user!'
         // ], 201);
@@ -109,7 +109,7 @@ class RegisterController extends Controller
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString()
-        ]);
+        ])->header('Content-Type','application/json; charset=UTF-8');
     }
 
     /**
@@ -123,7 +123,7 @@ class RegisterController extends Controller
 
         return response()->json([
             'message' => 'ログアウトしました'
-        ],201);
+        ],201)->header('Content-Type','application/json; charset=UTF-8');
     }
 
     /**
@@ -133,7 +133,7 @@ class RegisterController extends Controller
      */
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($request->user())->header('Content-Type','application/json; charset=UTF-8');
     }
 
 }

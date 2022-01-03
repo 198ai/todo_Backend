@@ -8,6 +8,7 @@ use Laravel\Passport\HasApiTokens;
 class TodoModel extends  Authenticatable
 {
     use HasApiTokens,Notifiable;
+    //protected $tabel ='todomodel';
       /**
      * The attributes that are mass assignable.
      *
