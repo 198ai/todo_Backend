@@ -12,7 +12,9 @@ class TodoModelController extends Controller
 {
     public function todolist(Request $request){
         $user = $request->user();
-        $request= DB::table('todomodel')->where('user_id', $user->id)->get();
+        $request= DB::table('todomodel')->where('user_id', $user->id)
+        ->select('id', 'user_id','title', 'time','date','endDate','complete')
+        ->get();
         return response()->json($request, 201)
         ->header('Content-Type','application/json; charset=UTF-8');
     }
