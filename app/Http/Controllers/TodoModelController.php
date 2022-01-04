@@ -13,6 +13,7 @@ class TodoModelController extends Controller
     public function todolist(Request $request){
         $user = $request->user();
         $request= DB::table('todomodel')->where('user_id', $user->id)
+        ->where('status','!=','1')
         ->select('id', 'user_id','title', 'time','date','endDate','complete')
         ->get();
         return response()->json($request, 201)
@@ -25,7 +26,8 @@ class TodoModelController extends Controller
             'time'=>'required',
             'date'=>'required',
             "endDate"=> 'required',
-            "complete"=>'required'
+            "complete"=>'required',
+            "status"=>'required'
         ]);
         $data =[
             'title'=>$request->title,
@@ -34,6 +36,7 @@ class TodoModelController extends Controller
             "endDate"=> $request->endDate,
             "complete"=>$request->complete,
             "user_id"=>$user->id,
+            "status"=>$request->status,
         ];
         $todolist =DB::table('todomodel')->insert($data);
         if($todolist){
@@ -52,7 +55,8 @@ class TodoModelController extends Controller
             'time'=>'required',
             'date'=>'required',
             "endDate"=> 'required',
-            "complete"=>'required'
+            "complete"=>'required',
+            "status"=>'required'
         ]);
         $data =[
             'title'=>$request->title,
@@ -61,6 +65,7 @@ class TodoModelController extends Controller
             "endDate"=> $request->endDate,
             "complete"=>$request->complete,
             "user_id"=>$user->id,
+            "status"=>$request->status,
         ];
         $todolist =DB::table('todomodel')
         ->where('id',$request->id)
@@ -74,4 +79,5 @@ class TodoModelController extends Controller
         }
        
     }
+   
 }
