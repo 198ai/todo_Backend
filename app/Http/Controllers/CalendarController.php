@@ -22,8 +22,9 @@ class CalendarController extends Controller
     ->where('user_id', $user->id)
     ->select("date")
     ->get();
-    $restult = DB::table('myevents')->
-    where('user_id', $user->id)
+    $restult = DB::table('myevents')
+    ->where('myevents.user_id', $user->id)
+    ->where('myalarm.user_id', $user->id)
     ->Join('myalarm','myevents.alarmId','=','myalarm.alarmId')
     ->where('myalarm.status','!=',1)
     ->select('myalarm.alarmId','myalarm.alarmDate','myalarm.alarmSubTitle','myalarm.alarmTitle','myalarm.status')->get();
