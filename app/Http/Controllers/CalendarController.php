@@ -16,12 +16,15 @@ use function PHPSTORM_META\map;
 class CalendarController extends Controller
 {
     ///アラーム查询
-   public function alarm(){
+   public function alarm(Request $request){
+    $user = $request->user();
     $calendardate = DB::table('calendar')
+    ->where('user_id', $user->id)
     ->select("date")
     ->get();
     $restult = DB::table('myevents')->
-    Join('myalarm','myevents.alarmId','=','myalarm.alarmId')
+    where('user_id', $user->id)
+    ->Join('myalarm','myevents.alarmId','=','myalarm.alarmId')
     ->where('myalarm.status','!=',1)
     ->select('myalarm.alarmId','myalarm.alarmDate','myalarm.alarmSubTitle','myalarm.alarmTitle','myalarm.status')->get();
  
@@ -30,6 +33,7 @@ class CalendarController extends Controller
     ->header('Content-Type','application/json; charset=UTF-8');
    }
    public function addalarm(Request $request){
+    $user = $request->user();
     $request->validate([
         'alarmDate'=>'required',
         'alarmSubTitle'=>'required',
@@ -40,7 +44,8 @@ class CalendarController extends Controller
         'alarmDate'=>$request->alarmDate,
         'alarmSubTitle'=>$request->alarmSubTitle,
         'alarmTitle'=>$request->alarmTitle,
-        'status'=>$request->status
+        'status'=>$request->status,
+        "user_id"=>$user->id,
     ];
     $add =DB::table('myalarm')->insert($data);
     if($add){
@@ -53,6 +58,7 @@ class CalendarController extends Controller
    
    }
    public function updatealarm(Request $request){
+    $user = $request->user();
     $request->validate([
         'alarmDate'=>'required',
         'alarmSubTitle'=>'required',
@@ -63,7 +69,8 @@ class CalendarController extends Controller
         'alarmDate'=>$request->alarmDate,
         'alarmSubTitle'=>$request->alarmSubTitle,
         'alarmTitle'=>$request->alarmTitle,
-        'status'=>$request->status
+        'status'=>$request->status,
+        "user_id"=>$user->id,
     ];
     $add =DB::table('myalarm')
     ->where('alarmId',$request->alarmId)
