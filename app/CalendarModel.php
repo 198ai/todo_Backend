@@ -16,7 +16,7 @@ class CalendarModel extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'alarmId','date', 'myeventsId','status'
+        'id', 'alarmId','date', 'myeventsId','status','alarmId'
     ];
 
     /**

@@ -11,6 +11,7 @@ Route::group([
 ], function () {
     Route::post('login', 'RegisterController@login');
     Route::post('signup', 'RegisterController@signup');
+    Route::get('set','CalendarController@set');
     Route::group([
       'middleware' => 'auth:api'
     ], function() {
@@ -22,6 +23,9 @@ Route::group([
         Route::get('alarm','CalendarController@alarm');
         Route::post('addalarm','CalendarController@addalarm');
         Route::post('updatealarm','CalendarController@updatealarm');
+        Route::get('calendar','CalendarController@calendar');
+        Route::post('addcalendar','CalendarController@addcalendar');
+        Route::post('updatecalendar','CalendarController@updatecalendar');
     });
 });
 
