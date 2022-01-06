@@ -99,7 +99,7 @@ class CalendarController extends Controller
         $restult = DB::table('myevents')
         ->where('myevents.user_id', $user->id)
         ->where('myalarm.user_id', $user->id)
-        ->leftJoin('myalarm','myalarm.alarmId','=','myevents.alarmId',)
+        ->leftJoin('myalarm','myalarm.alarmId','=','myevents.alarmId')
         ->orwhereNull('myevents.alarmId')
         ->where('myalarm.status','!=',1)
         ->where('myevents.status','!=',1)
