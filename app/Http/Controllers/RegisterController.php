@@ -84,7 +84,7 @@ class RegisterController extends Controller
             'password'=>'required|min:5'
         ]);
 
-        $credentials = request(['email', 'password']);
+        $credentials = request(['name','email', 'password']);
 
         if(!Auth::attempt($credentials))
             return response()->json([
