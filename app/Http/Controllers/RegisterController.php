@@ -109,7 +109,7 @@ class RegisterController extends Controller
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString()
-        ])->header('Content-Type','application/json; charset=UTF-8');
+        ],201)->header('Content-Type','application/json; charset=UTF-8');
     }
 
     /**
