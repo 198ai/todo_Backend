@@ -7,6 +7,7 @@ use App\TodoModel;
 use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use App\Http\Requests\RegisterUserRequest;
 class TodoModelController extends Controller
 {
@@ -14,7 +15,7 @@ class TodoModelController extends Controller
         $user = $request->user();
         $request= DB::table('todomodel')->where('user_id', $user->id)
         ->where('status','!=','1')
-        ->select('id', 'user_id','title', 'time','date','endDate','complete')
+        ->select('id', 'user_id','title', 'time','date','endDate','created_at','updated_at','complete')
         ->get();
         return response()->json($request, 201)
         ->header('Content-Type','application/json; charset=UTF-8');
@@ -29,6 +30,7 @@ class TodoModelController extends Controller
             "complete"=>'required',
             "status"=>'required'
         ]);
+        
         $data =[
             'title'=>$request->title,
             'time'=>$request->time,
@@ -37,6 +39,8 @@ class TodoModelController extends Controller
             "complete"=>$request->complete,
             "user_id"=>$user->id,
             "status"=>$request->status,
+            "created_at"=>Carbon::now(),
+            "updated_at"=>Carbon::now(),
         ];
         $todolist =DB::table('todomodel')->insert($data);
         if($todolist){
