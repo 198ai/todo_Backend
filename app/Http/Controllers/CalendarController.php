@@ -6,11 +6,13 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\User;
 use App\CalendarModel;
-use App\MyEventsModel;
+use App\myevents;
 use App\MyAlarmModel;
+use DateTime;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use function PHPSTORM_META\map;
+
 
 class CalendarController extends Controller
 {
@@ -89,7 +91,19 @@ class CalendarController extends Controller
     return "123";
    }
 
-
+   public function addevents(Request $request){
+        $user = $request->user();
+        $collection = collect();
+        $collapsed = $collection->collapse();
+        $ss="2022-02-01 00:00:00.000";
+        $request->$ss;
+        //return response()->json($request->$ss,200);
+        $data = [];
+        foreach ( $request->$ss as $value){
+            $data[] =  $value;
+            
+        }return response()->json($data ,200);
+    }
    public function calendar(Request $request){
         $user = $request->user();
         $calendardate = DB::table('myevents')
@@ -134,26 +148,25 @@ class CalendarController extends Controller
 
     public function addcalendar(Request $request){
         $user = $request->user();
-
+    
         $request->validate([
             'alarmId'=>'required',
             'eventTitle'=>'required',
             'eventDescp'=>'required',
-            'date'=>'required',
             'status'=>'required',
         ]);
-  
+
+        //$request->alarmDate!=null? $date = Carbon::parse($request->alarmDate)->format('Y-m-d h:i:s'):$date =null;
         $data =[
             'alarmId'=>$request->alarmId,
             'eventTitle'=>$request->eventTitle,
             'eventDescp'=>$request->eventDescp,
-            'date'=>$request->date,
             'status'=>$request->status,
             "user_id"=>$user->id,
         ];
        
-      
         $add =DB::table('myevents')->insert($data);
+        
         if($add){
             return response()->json("追加しました", 201)
             ->header('Content-Type','application/json; charset=UTF-8');
@@ -194,5 +207,80 @@ class CalendarController extends Controller
             ->header('Content-Type','application/json; charset=UTF-8');
         }
     }
+
+
+
+
+/**
+ * 
+ */  
+public function myevents(Request $request){
+    $user = $request->user();
+    //改成数组
+    $data = $request->all();
+    
+    foreach($data as $rows){
+        //将array变成map
+        $object = (object) $rows;
+        //查询日历里面有没，有就拿出ID 没有就添加日期
+        if($object->calendar !=null){
+            $id= self::getCalendarId($object->calendar,$user->id);
+            if($id !=false){
+                $calendarId = $id; 
+            }
+        }
+        //查询myevents里面有没有 有就更新数据 没有就添加
+        if($object->events !=null){
+            foreach($object->events as $row){
+                $object = (object) $row;
+                if($object->eventTitle !=null && $object->eventDescp!=null){
+                    $eventsId = myevents::getId($object->eventTitle,$object->eventDescp);
+                    
+                }
+                if($eventsId ==null){
+                    //添加user数据
+                    $data =[
+                        'eventTitle'=>$object->eventTitle,
+                        'eventDescp'=>$object->eventDescp,
+                        'alarmDate'=>$object->alarm,
+                        "user_id"=>$user->id,
+                        "calendarId"=>$calendarId->id,
+                        "status"=>$object->status
+                    ];
+                   $eventsId = myevents::insert($data);
+                }
+            }
+        }
+    }
+    //添加完毕以后查询一下
+    $all=myevents::all()->where("user_id",$user->id);
+    return response()->json($all, 201) ->header('Content-Type','application/json; charset=UTF-8');
+}
+
+  public static function getCalendarId (String $calendar, int $userId){
+   
+    $calendarId = DB::table('calendar')
+    ->select('id')
+    ->where('user_id', $userId)
+    ->where('date', $calendar)
+    ->where('status', 0)
+    ->first();
+    
+    if($calendarId ==null){
+        $data =[
+            'date'=>$calendar,
+            "user_id"=>$userId,
+            "status"=>0
+        ];
+        $add =DB::table('calendar')->insert($data);
+        $calendarId = DB::table('calendar')
+        ->select('id')
+        ->where('user_id', $userId)
+        ->where('date', $calendar)
+        ->where('status', 0)
+        ->first();
+    }
+    return  $calendarId;
+  } 
 
 }

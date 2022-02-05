@@ -3,12 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
-class MyEventsModel extends Model
+class myevents extends Model
 {
-    use HasApiTokens,Notifiable;
+    
     protected $tabel ='myevents';
       /**
      * The attributes that are mass assignable.
@@ -16,7 +17,7 @@ class MyEventsModel extends Model
      * @var array
      */
     protected $fillable = [
-        'id', 'eventTitle','eventDescp','alarmId','status',
+        'id', 'user_id','eventTitle','eventDescp','alarmDate','calendarId','status',
     ];
 
     /**
@@ -36,4 +37,12 @@ class MyEventsModel extends Model
     protected $casts = [
        
     ];
+
+    public static function getId($eventTitle,$eventDescp){
+        $id = myevents::select('id')
+        ->where('eventTitle','=',$eventTitle)
+        ->where('eventDescp','=',$eventDescp)
+        ->first();
+        return $id;
+    }
 }

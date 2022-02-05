@@ -20,12 +20,15 @@ Route::group([
         Route::get('todolist', 'TodoModelController@todolist');
         Route::post('addtodolist', 'TodoModelController@addtodolist');
         Route::post('updatetodolist', 'TodoModelController@updatetodolist');
+        Route::post('updatetime', 'TodoModelController@updatetime');
         Route::get('alarm','CalendarController@alarm');
         Route::post('addalarm','CalendarController@addalarm');
         Route::post('updatealarm','CalendarController@updatealarm');
         Route::get('calendar','CalendarController@calendar');
         Route::post('addcalendar','CalendarController@addcalendar');
         Route::post('updatecalendar','CalendarController@updatecalendar');
+        Route::post('addevents','CalendarController@addevents');
+        Route::post('myevents','CalendarController@myevents');
     });
 });
 

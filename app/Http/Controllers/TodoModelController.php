@@ -83,5 +83,27 @@ class TodoModelController extends Controller
         }
        
     }
-   
+    public function updatetime(Request $request){
+        $user = $request->user();
+        $request->validate([
+            'time'=>'required',
+            "complete"=>'required',
+        ]);
+        $data =[
+            'time'=>$request->time,
+            "complete"=>$request->complete,
+            "user_id"=>$user->id,
+        ];
+        $todolist =DB::table('todomodel')
+        ->where('id',$request->id)
+        ->update($data);
+        if($todolist==1){
+            return response()->json("更新しました", 201)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }else{
+            return response()->json("更新失敗した", 400)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+       
+    }
 }
