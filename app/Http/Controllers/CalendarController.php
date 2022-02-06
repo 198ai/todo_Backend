@@ -245,7 +245,7 @@ public function myevents(Request $request){
                         'alarmDate'=>$object->alarm,
                         "user_id"=>$user->id,
                         "calendarId"=>$calendarId->id,
-                        "updatetime"=>Carbon::now(),
+                        "updatetime"=>$object->updatetime,
                         "status"=>0
                     ];
                    $eventsId = myevents::insert($data);
@@ -292,30 +292,39 @@ public function sendmyevents(Request $request){
     $user = $request->user();
     //查询这个账户的所有状态为零的myevents
     //返回
-    $restult = DB::table('myevents')
+    $restult = DB::table('calendar')
+        ->select('id','date')
+        ->where('user_id', $user->id)
+        ->where('status', 0)
+        ->get();
+    $restult2 = DB::table('myevents')
     ->where('myevents.user_id', $user->id)
     ->where('calendar.user_id', $user->id)
     ->Join('calendar','myevents.calendarId','=','calendar.id')
     ->where('calendar.status','!=',1)
     ->where('myevents.status','!=',1)
-    ->select('myevents.eventTitle','myevents.alarmDate','myevents.id as alarmId','myevents.eventDescp','calendar.date as calendar','calendar.id as calendarId','myevents.status','myevents.updatetime')
-    //->select('calendar.date as calendar','calendar.id')
-    ->distinct()
+    ->select('myevents.eventTitle','myevents.alarmDate','myevents.id as alarmId','myevents.eventDescp','calendar.id as calendarId','myevents.status','myevents.updatetime')
+    //->distinct()
     ->get();
     if($restult !=null){
         foreach($restult as $row){
+            foreach($restult2 as $row2){
+                if($row2->calendarId == $row->id){
+                    $events=[
+                        'eventTitle'=>$row2->eventTitle,
+                        'eventDescp'=>$row2->eventDescp,
+                        'alarm'=>$row2->alarmDate ==null? "":$row2->alarmDate,
+                        "alarmId"=>$row2->alarmId,
+                        "status"=>0
+                    ];
+                    $eventslist[]= $events;
+                }
+            }
             $data=[  
-                "calendar"=>$row->calendar,
-                "events"=>[
-                    'eventTitle'=>$row->eventTitle,
-                    'eventDescp'=>$row->eventDescp,
-                    'alarm'=>$row->alarmDate,
-                    "alarmId"=>$row->alarmId,
-                    "status"=>0
-                ]
+                "calendar"=>$row->date,
+                "events"=>$eventslist
             ];
-            $list[]=$data;
-            
+            $list[]=$data; 
         }
     }
     return response()->json($list, 201) ->header('Content-Type','application/json; charset=UTF-8');
