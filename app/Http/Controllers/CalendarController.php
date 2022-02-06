@@ -212,7 +212,7 @@ class CalendarController extends Controller
 
 
 /**
- * 
+ * 送信
  */  
 public function myevents(Request $request){
     $user = $request->user();
@@ -245,7 +245,7 @@ public function myevents(Request $request){
                         'alarmDate'=>$object->alarm,
                         "user_id"=>$user->id,
                         "calendarId"=>$calendarId->id,
-                        "status"=>$object->status
+                        "status"=>0
                     ];
                    $eventsId = myevents::insert($data);
                 }
@@ -282,5 +282,43 @@ public function myevents(Request $request){
     }
     return  $calendarId;
   } 
+
+
+/**
+ * 收信
+ */ 
+public function sendmyevents(Request $request){
+    $user = $request->user();
+    //查询这个账户的所有状态为零的myevents
+    //返回
+    $restult = DB::table('myevents')
+    ->where('myevents.user_id', $user->id)
+    ->where('calendar.user_id', $user->id)
+    ->Join('calendar','myevents.calendarId','=','calendar.id')
+    ->where('calendar.status','!=',1)
+    ->where('myevents.status','!=',1)
+    ->select('myevents.eventTitle','myevents.alarmDate','myevents.id as alarmId','myevents.eventDescp','calendar.date as calendar','calendar.id as calendarId','myevents.status')
+    //->select('calendar.date as calendar','calendar.id')
+    ->distinct()
+    ->get();
+    if($restult !=null){
+        foreach($restult as $row){
+            $data=[  
+                "calendar"=>$row->calendar,
+                "events"=>[
+                    'eventTitle'=>$row->eventTitle,
+                    'eventDescp'=>$row->eventDescp,
+                    'alarm'=>$row->alarmDate,
+                    "alarmId"=>$row->alarmId,
+                    "status"=>0
+                ]
+            ];
+            $list[]=$data;
+            
+        }
+    }
+    return response()->json($list, 201) ->header('Content-Type','application/json; charset=UTF-8');
+    
+}
 
 }

@@ -29,6 +29,7 @@ Route::group([
         Route::post('updatecalendar','CalendarController@updatecalendar');
         Route::post('addevents','CalendarController@addevents');
         Route::post('myevents','CalendarController@myevents');
+        Route::get('sendmyevents','CalendarController@sendmyevents');
     });
 });
 
