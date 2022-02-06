@@ -245,6 +245,7 @@ public function myevents(Request $request){
                         'alarmDate'=>$object->alarm,
                         "user_id"=>$user->id,
                         "calendarId"=>$calendarId->id,
+                        "updatetime"=>Carbon::now(),
                         "status"=>0
                     ];
                    $eventsId = myevents::insert($data);
@@ -297,7 +298,7 @@ public function sendmyevents(Request $request){
     ->Join('calendar','myevents.calendarId','=','calendar.id')
     ->where('calendar.status','!=',1)
     ->where('myevents.status','!=',1)
-    ->select('myevents.eventTitle','myevents.alarmDate','myevents.id as alarmId','myevents.eventDescp','calendar.date as calendar','calendar.id as calendarId','myevents.status')
+    ->select('myevents.eventTitle','myevents.alarmDate','myevents.id as alarmId','myevents.eventDescp','calendar.date as calendar','calendar.id as calendarId','myevents.status','myevents.updatetime')
     //->select('calendar.date as calendar','calendar.id')
     ->distinct()
     ->get();
