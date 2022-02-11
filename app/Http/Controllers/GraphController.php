@@ -49,4 +49,48 @@ class GraphController extends Controller
         }
         return response()->json("統計更新成功", 201) ->header('Content-Type','application/json; charset=UTF-8');
     }
+
+
+    public function getgraph(Request $request){
+        $user = $request->user();
+        $restult = DB::table('graph')->where('user_id', $user->id)->where('status',0)->get();
+        if($restult ==null){
+            return response()->json("データがありません", 201) ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        $arry=array();
+        $arry2=array();
+        $data2=[];
+        $date="";
+        foreach($restult as $row){
+           
+           if($date==$row->date){
+            $contents =[
+                "events"=>$row->events,
+                "times"=>$row->times];
+            $array[]=$contents;
+            $data2=[
+                "date"=>$date,
+                "contents"=>$array];
+            }
+            //如果是空就先赋值
+            if($date=="" || $date!=$row->date){
+                if($date!=""){
+                    $arry2[]=$data2;
+                }
+                
+                $data2=[];
+                $array=[];
+                $date=$row->date;
+                $contents =[
+                    "events"=>$row->events,
+                    "times"=>$row->times];
+                $array[]=$contents;
+                $data2=[
+                    "date"=>$date,
+                    "contents"=>$array];
+            }
+            
+        }
+        return response()->json($arry2, 201) ->header('Content-Type','application/json; charset=UTF-8');
+    }
 }

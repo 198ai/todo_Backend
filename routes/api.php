@@ -32,6 +32,7 @@ Route::group([
         Route::get('sendmyevents','CalendarController@sendmyevents');
         Route::post('deletemyevents','CalendarController@deletemyevents');
         Route::post('postgraph','GraphController@postgraph');
+        Route::get('getgraph','GraphController@getgraph');
     });
 });
 
