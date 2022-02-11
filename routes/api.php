@@ -30,6 +30,8 @@ Route::group([
         Route::post('addevents','CalendarController@addevents');
         Route::post('myevents','CalendarController@myevents');
         Route::get('sendmyevents','CalendarController@sendmyevents');
+        Route::post('deletemyevents','CalendarController@deletemyevents');
+        Route::post('postgraph','GraphController@postgraph');
     });
 });
 

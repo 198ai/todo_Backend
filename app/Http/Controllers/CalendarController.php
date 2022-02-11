@@ -214,6 +214,7 @@ class CalendarController extends Controller
 /**
  * 送信
  */  
+
 public function myevents(Request $request){
     $user = $request->user();
     //改成数组
@@ -254,7 +255,7 @@ public function myevents(Request $request){
         }
     }
     //添加完毕以后查询一下
-    $all=myevents::all()->where("user_id",$user->id);
+    $all = myevents::all()->where("user_id",$user->id)->where("status",0);
     return response()->json($all, 201) ->header('Content-Type','application/json; charset=UTF-8');
 }
 
@@ -289,6 +290,7 @@ public function myevents(Request $request){
  * 收信
  */ 
 public function sendmyevents(Request $request){
+    
     $user = $request->user();
     //查询这个账户的所有状态为零的myevents
     //返回
@@ -297,6 +299,9 @@ public function sendmyevents(Request $request){
         ->where('user_id', $user->id)
         ->where('status', 0)
         ->get();
+    if($restult ==null){
+        return response()->json("データなし", 400) ->header('Content-Type','application/json');
+    } 
     $restult2 = DB::table('myevents')
     ->where('myevents.user_id', $user->id)
     ->where('calendar.user_id', $user->id)
@@ -307,13 +312,15 @@ public function sendmyevents(Request $request){
     //->distinct()
     ->get();
     if($restult !=null){
+        $list = array();
         foreach($restult as $row){
             foreach($restult2 as $row2){
                 if($row2->calendarId == $row->id){
                     $events=[
                         'eventTitle'=>$row2->eventTitle,
                         'eventDescp'=>$row2->eventDescp,
-                        'alarm'=>$row2->alarmDate ==null? "":$row2->alarmDate,
+                        'alarm'=>$row2->alarmDate ==null ? "":$row2->alarmDate,
+                        "updatetime"=>$row2->updatetime,
                         "alarmId"=>$row2->alarmId,
                         "status"=>0
                     ];
@@ -324,11 +331,82 @@ public function sendmyevents(Request $request){
                 "calendar"=>$row->date,
                 "events"=>$eventslist
             ];
+            $eventslist=[];
             $list[]=$data; 
         }
+        return response()->json($list, 201) ->header('Content-Type','application/json');
     }
-    return response()->json($list, 201) ->header('Content-Type','application/json; charset=UTF-8');
+    return response()->json("something goes wrong", 400) ->header('Content-Type','application/json; charset=UTF-8');
     
 }
+
+public function deletemyevents(Request $request){
+    $user = $request->user();
+    //改成数组
+    $data = $request->all();
+    
+    foreach($data as $rows){
+        //将array变成map
+        $object1 = (object) $rows;
+      
+
+        //查询日历里面有没，有就拿出ID 没有就添加日期
+        if($object1->events !=null){
+            foreach($object1->events as $row){
+                $object = (object) $row;
+
+                
+                $data=[
+                    'eventTitle'=>$object->eventTitle,
+                    'eventDescp'=>$object->eventDescp,
+                    'alarmDate'=>$object->alarm,
+                    "updatetime"=>$object->updatetime,
+                    "status"=>1
+                ];
+                $myeventsId = DB::table('myevents')
+                ->where('user_id', $user->id)
+                ->where('eventTitle',$object->eventTitle)
+                ->update($data);
+                if($myeventsId!=1){
+                    return response()->json("削除失敗した" , 400) ->header('Content-Type','application/json');
+                }
+
+                $calendarId = DB::table('calendar')
+                ->where('user_id', $user->id)
+                ->where('date', $object1->calendar)
+                ->where('status','!=',1)
+                ->value('id');
+                if($calendarId ==null){
+                    return response()->json("検索エラー", 400) ->header('Content-Type','application/json');
+                }
+                $restult2 = DB::table('myevents')
+                ->where('user_id', $user->id)
+                ->where('calendarId','=',$calendarId)
+                ->where('status','!=',1)
+                //->distinct()
+                ->get();
+               
+                if($restult2->isEmpty()){
+                    //return response()->json($restult2 , 201) ->header('Content-Type','application/json');
+                    $data=[
+                        "status"=>1
+                    ];
+                    $calendarId = DB::table('calendar')
+                    ->where('user_id', $user->id)
+                    ->where('id', $calendarId)
+                    ->update($data);
+                    if($calendarId !=1){
+                        return response()->json("カレンダー削除失敗した", 400) ->header('Content-Type','application/json');
+                    }
+                   
+                }
+            }
+
+            
+            return response()->json("削除成功" , 201) ->header('Content-Type','application/json');
+        }
+    }
+}
+
 
 }
