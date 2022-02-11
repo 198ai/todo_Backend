@@ -53,11 +53,11 @@ class GraphController extends Controller
 
     public function getgraph(Request $request){
         $user = $request->user();
-        $restult = DB::table('graph')->where('user_id', $user->id)->where('status',0)->get();
+        $restult = DB::table('graph')->where('user_id', 57)->where('status',0)->get();
         if($restult ==null){
-            return response()->json("データがありません", 201) ->header('Content-Type','application/json; charset=UTF-8');
+            return response()->json("データがありません", 400) ->header('Content-Type','application/json; charset=UTF-8');
         }
-        $arry=array();
+        
         $arry2=array();
         $data2=[];
         $date="";
@@ -77,7 +77,6 @@ class GraphController extends Controller
                 if($date!=""){
                     $arry2[]=$data2;
                 }
-                
                 $data2=[];
                 $array=[];
                 $date=$row->date;
@@ -89,8 +88,9 @@ class GraphController extends Controller
                     "date"=>$date,
                     "contents"=>$array];
             }
-            
         }
+        $arry2[]=$data2;
+        //return response()->json($array, 201) ->header('Content-Type','application/json; charset=UTF-8');
         return response()->json($arry2, 201) ->header('Content-Type','application/json; charset=UTF-8');
     }
 }
