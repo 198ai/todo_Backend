@@ -53,7 +53,7 @@ class GraphController extends Controller
 
     public function getgraph(Request $request){
         $user = $request->user();
-        $restult = DB::table('graph')->where('user_id', 57)->where('status',0)->get();
+        $restult = DB::table('graph')->where('user_id',$user->id)->where('status',0)->get();
         if($restult ==null){
             return response()->json("データがありません", 400) ->header('Content-Type','application/json; charset=UTF-8');
         }
