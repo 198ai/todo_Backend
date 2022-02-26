@@ -10,6 +10,7 @@ Route::group([
     'prefix' => 'v1'
 ], function () {
     Route::post('login', 'RegisterController@login');
+    Route::post('forgotpassword', 'ForgotPasswordController@forgotpassword');
     Route::post('signup', 'RegisterController@signup');
     Route::get('set','CalendarController@set');
     Route::group([
