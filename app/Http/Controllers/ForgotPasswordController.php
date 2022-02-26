@@ -10,6 +10,7 @@ use App\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 class ForgotPasswordController extends Controller
 {
@@ -37,10 +38,10 @@ class ForgotPasswordController extends Controller
         $checked = DB::table('password_resets')->where('email',self::$email)->latest('created_at')->value('created_at');
        
         if ($checked != null) {
-            $times =Carbon::now()->diffInMinutes($checked)>5;
+            $times =Carbon::now()->diffInMinutes($checked)>1;
             //小于5分钟的就返回请等待五分钟
             if(!$times){
-                return response()->json("検証コードは5分以内にご利用いただけます。", 400)
+                return response()->json("60秒ごとに一回認証コードの再発行ができます。", 400)
                 ->header('Content-Type','application/json; charset=UTF-8');
             }
         }
@@ -68,5 +69,39 @@ class ForgotPasswordController extends Controller
         ->header('Content-Type','application/json; charset=UTF-8');
         }
         
+    }
+
+
+    public function resetPassword(Request $request){
+        $error=[
+            'token.required'=>"認証コードを入力してください。",
+            'email.required'=>"アカウントのメールアドレスを入力してください。",
+        ];
+        $validator = Validator::make($request->all(), ['token'=>'required','email'=>'required|email'],$error);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        //先检查是不是超过五分钟
+        $checkedTime = DB::table('password_resets')->where('email',$request->email)->latest('created_at')->value('created_at');
+        if ($checkedTime != null) {
+            $times =Carbon::now()->diffInMinutes($checkedTime)>5;
+            //大于5分钟的就返回请重新申请
+            if($times){
+                return response()->json("認証コードは5分以内にご利用いただけます。", 400)
+                ->header('Content-Type','application/json; charset=UTF-8');
+            }
+        }
+        $checkedToken = DB::table('password_resets')->where('email',$request->email)->latest('created_at')->value('token');
+        if($checkedToken!=null){
+            //入力されたTOKENと判断
+            if (decrypt($checkedToken)!=$request->token) {
+              //認証コードは違う時
+              return response()->json("認証コードが間違っています", 400)
+              ->header('Content-Type','application/json; charset=UTF-8');
+            }
+        }
+        return response()->json("認証コードは正しいです", 200)
+        ->header('Content-Type','application/json; charset=UTF-8');
     }
 }

@@ -11,6 +11,7 @@ Route::group([
 ], function () {
     Route::post('login', 'RegisterController@login');
     Route::post('forgotpassword', 'ForgotPasswordController@forgotpassword');
+    Route::post('resetPassword', 'ForgotPasswordController@resetPassword');
     Route::post('signup', 'RegisterController@signup');
     Route::get('set','CalendarController@set');
     Route::group([
