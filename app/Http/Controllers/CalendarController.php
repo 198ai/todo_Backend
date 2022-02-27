@@ -313,6 +313,7 @@ public function sendmyevents(Request $request){
     ->get();
     if($restult !=null){
         $list = array();
+        $eventslist=[];
         foreach($restult as $row){
             foreach($restult2 as $row2){
                 if($row2->calendarId == $row->id){

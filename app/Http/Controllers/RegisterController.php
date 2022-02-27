@@ -80,30 +80,6 @@ class RegisterController extends Controller
      */
     public function login(Request $request)
     {
-        // $request->validate([
-        //     'name'=>'required|min:3',
-        //     'email'=>'required|email',
-        //     'password'=>'required|min:5'
-        // ]);
-
-        // $credentials = request(['name','email', 'password']);
-
-        // if(!Auth::attempt($credentials))
-        //     return response()->json([
-        //         'message' => 'Unauthorized'
-        //     ], 401);
-
-        // $user = $request->user();
-
-        // $tokenResult = $user->createToken('Personal Access Token');
-        // $token = $tokenResult->token;
-
-        // if ($request->remember_me)
-        //     $token->expires_at = Carbon::now()->addWeeks(1);
-
-        // $token->save();
-
-       
         $data = [
             'email'=>'required|email',
             'password'=>'required|min:5'
@@ -119,7 +95,7 @@ class RegisterController extends Controller
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         if(!Hash::check($request->password,$user->password)){
-            return response()->json("パスワードが間違っています")
+            return response()->json("パスワードが間違っています",401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         
