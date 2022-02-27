@@ -107,7 +107,7 @@ class ForgotPasswordController extends Controller
         }
        
         //パスワードリセット
-        $resetPassword = DB::table('users')->where('email',$request->email)->update(['password'=>encrypt($request->password)]);
+        $resetPassword = DB::table('users')->where('email',$request->email)->update(['password'=>Hash::make($request->password)]);
         if($resetPassword ==-1){
             return response()->json("パスワードリセットに失敗しました", 400)
             ->header('Content-Type','application/json; charset=UTF-8');

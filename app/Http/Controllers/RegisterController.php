@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Http\Request;
 use App\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 class RegisterController extends Controller
@@ -31,7 +33,7 @@ class RegisterController extends Controller
         $user = new User([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password)
+            'password' => Hash::make($request->password)
         ]);
 
         $user->save();
@@ -78,37 +80,55 @@ class RegisterController extends Controller
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'name'=>'required|min:3',
+        // $request->validate([
+        //     'name'=>'required|min:3',
+        //     'email'=>'required|email',
+        //     'password'=>'required|min:5'
+        // ]);
+
+        // $credentials = request(['name','email', 'password']);
+
+        // if(!Auth::attempt($credentials))
+        //     return response()->json([
+        //         'message' => 'Unauthorized'
+        //     ], 401);
+
+        // $user = $request->user();
+
+        // $tokenResult = $user->createToken('Personal Access Token');
+        // $token = $tokenResult->token;
+
+        // if ($request->remember_me)
+        //     $token->expires_at = Carbon::now()->addWeeks(1);
+
+        // $token->save();
+
+       
+        $data = [
             'email'=>'required|email',
             'password'=>'required|min:5'
-        ]);
-
-        $credentials = request(['name','email', 'password']);
-
-        if(!Auth::attempt($credentials))
-            return response()->json([
-                'message' => 'Unauthorized'
-            ], 401);
-
-        $user = $request->user();
-
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-
-        if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
-
-        $token->save();
-
-        return response()->json([
+        ];
+        $validator = Validator::make($request->all(),$data);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 401)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        $user =User::where('email',$request->email)->first();
+        if(!$user){
+            return response()->json("メールアドレスが間違っています。",401)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        if(!Hash::check($request->password,$user->password)){
+            return response()->json("パスワードが間違っています")
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        
+        $token = $user->createToken('Auth Token')->accessToken;
+         return response()->json([
             'name'=>$user->name,
             'email'=>$user->email,
-            'access_token' => $tokenResult->accessToken,
+            'access_token' => $token,
             'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString()
         ],201)->header('Content-Type','application/json; charset=UTF-8');
     }
 
