@@ -112,7 +112,7 @@ class ForgotPasswordController extends Controller
             return response()->json("パスワードリセットに失敗しました", 400)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
-        return response()->json("パスワードをリセットしました。", 200)
+        return response()->json("パスワードをリセットしました。", 201)
         ->header('Content-Type','application/json; charset=UTF-8');
     }
 }
