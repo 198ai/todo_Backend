@@ -20,12 +20,12 @@ class ForgotPasswordController extends Controller
         
         $validator = Validator::make($request->all(), ['email'=>'required|email']);
         if ($validator->fails()) {
-            return response()->json("正しくメールを入力してください。", 400)
+            return response()->json("正しくメールを入力してください。", 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         self::$email = DB::table('users')->where('email',$request->email)->value('email');
         if (self::$email ==null) {
-            return response()->json("このメールアドレスは登録されていません。", 400)
+            return response()->json("このメールアドレスは登録されていません。", 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         //随机生成验证码
@@ -41,7 +41,7 @@ class ForgotPasswordController extends Controller
             $times =Carbon::now()->diffInMinutes($checked)>1;
             //小于5分钟的就返回请等待五分钟
             if(!$times){
-                return response()->json("60秒ごとに一回認証コードの再発行ができます。", 400)
+                return response()->json("60秒ごとに一回認証コードの再発行ができます。", 401)
                 ->header('Content-Type','application/json; charset=UTF-8');
             }
         }
@@ -53,10 +53,10 @@ class ForgotPasswordController extends Controller
         ];
         $saved = DB::table('password_resets')->insert($data);
         if (!$saved) {
-            return response()->json("DBへ書き込みを失敗しました。", 400)
+            return response()->json("DBへ書き込みを失敗しました。", 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
-        Mail::send('emails.test',['key'=>$key],function($message){
+        $send = Mail::send('emails.test',['key'=>$key],function($message){
             $to = self::$email;
             $message ->to($to)->subject('パスワードリセットの認証コード');
         });
@@ -64,8 +64,8 @@ class ForgotPasswordController extends Controller
         if(count(Mail::failures()) < 1){
             return response()->json("認証コードを発送しました。", 201)
         ->header('Content-Type','application/json; charset=UTF-8');
-        }else{
-            return response()->json("メールが失敗した", 400)
+        }else if(count(Mail::failures()) > 1){
+            return response()->json(["メールが失敗した",$send], 401)
         ->header('Content-Type','application/json; charset=UTF-8');
         }
         
@@ -80,7 +80,7 @@ class ForgotPasswordController extends Controller
         ];
         $validator = Validator::make($request->all(), ['token'=>'required','email'=>'required|email','password'=>'required|min:6'],$error);
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400)
+            return response()->json($validator->errors(), 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         //先检查是不是超过五分钟
@@ -91,25 +91,25 @@ class ForgotPasswordController extends Controller
                 //入力されたTOKENと判断
                 if (decrypt($checkedToken)!=$request->token) {
                   //認証コードは違う時
-                  return response()->json("認証コードが間違っています", 400)
+                  return response()->json("認証コードが間違っています", 401)
                   ->header('Content-Type','application/json; charset=UTF-8');
                 }
             }
             $times =Carbon::now()->diffInMinutes($checkedTime)>5;
             //大于5分钟的就返回请重新申请
             if($times){
-                return response()->json("認証コードは5分以内にご利用いただけます。", 400)
+                return response()->json("認証コードは5分以内にご利用いただけます。", 401)
                 ->header('Content-Type','application/json; charset=UTF-8');
             }
         }else if($checkedTime == null){
-            return response()->json("メールアドレスの認証コードが発行していません。", 400)
+            return response()->json("メールアドレスの認証コードが発行していません。", 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
        
         //パスワードリセット
         $resetPassword = DB::table('users')->where('email',$request->email)->update(['password'=>Hash::make($request->password)]);
         if($resetPassword ==-1){
-            return response()->json("パスワードリセットに失敗しました", 400)
+            return response()->json("パスワードリセットに失敗しました", 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         $user =User::where('email',$request->email)->first();
@@ -145,7 +145,7 @@ class ForgotPasswordController extends Controller
           //パスワードリセット
           $resetPassword = DB::table('users')->where('email',$request->email)->update(['password'=>Hash::make($request->newpassword)]);
           if($resetPassword ==-1){
-              return response()->json("パスワードリセットに失敗しました", 400)
+              return response()->json("パスワードリセットに失敗しました", 401)
               ->header('Content-Type','application/json; charset=UTF-8');
           }
           $token = $user->createToken('Auth Token')->accessToken;
