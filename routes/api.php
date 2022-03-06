@@ -13,6 +13,7 @@ Route::group([
     Route::post('forgotpassword', 'ForgotPasswordController@forgotpassword');
     Route::post('resetPassword', 'ForgotPasswordController@resetPassword');
     Route::post('signup', 'RegisterController@signup');
+    Route::post('changePassword', 'ForgotPasswordController@changePassword');
     Route::get('set','CalendarController@set');
     Route::group([
       'middleware' => 'auth:api'

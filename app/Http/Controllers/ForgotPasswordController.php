@@ -115,4 +115,34 @@ class ForgotPasswordController extends Controller
         return response()->json("パスワードをリセットしました。", 201)
         ->header('Content-Type','application/json; charset=UTF-8');
     }
+
+    public function changePassword(Request $request){
+        $data = [
+            'email'=>'required|email',
+            'password'=>'required|min:5',
+            'newpassword'=>'required|min:5'
+        ];
+        $validator = Validator::make($request->all(),$data);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 401)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        $user =User::where('email',$request->email)->first();
+        if(!$user){
+            return response()->json("メールアドレスが間違っています。",401)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+        if(!Hash::check($request->password,$user->password)){
+            return response()->json("旧パスワードが間違っています",401)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
+          //パスワードリセット
+          $resetPassword = DB::table('users')->where('email',$request->email)->update(['password'=>Hash::make($request->newpassword)]);
+          if($resetPassword ==-1){
+              return response()->json("パスワードリセットに失敗しました", 400)
+              ->header('Content-Type','application/json; charset=UTF-8');
+          }
+          return response()->json("パスワードを変更しました。", 201)
+          ->header('Content-Type','application/json; charset=UTF-8');
+    }
 }
