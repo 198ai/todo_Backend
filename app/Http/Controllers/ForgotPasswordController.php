@@ -62,7 +62,7 @@ class ForgotPasswordController extends Controller
         });
         // 返回的一个错误数组，利用此可以判断是否发送成功
         if(count(Mail::failures()) < 1){
-            return response()->json("メールが発送しました、ご確認よろしくお願い致します", 201)
+            return response()->json("認証コードを発送しました。", 201)
         ->header('Content-Type','application/json; charset=UTF-8');
         }else{
             return response()->json("メールが失敗した", 400)
@@ -112,8 +112,14 @@ class ForgotPasswordController extends Controller
             return response()->json("パスワードリセットに失敗しました", 400)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
-        return response()->json("パスワードをリセットしました。", 201)
-        ->header('Content-Type','application/json; charset=UTF-8');
+        $user =User::where('email',$request->email)->first();
+        $token = $user->createToken('Auth Token')->accessToken;
+          return response()->json([
+             'name'=>$user->name,
+             'email'=>$user->email,
+             'access_token' => $token,
+             'token_type' => 'Bearer',
+         ],201)->header('Content-Type','application/json; charset=UTF-8');
     }
 
     public function changePassword(Request $request){
@@ -142,7 +148,12 @@ class ForgotPasswordController extends Controller
               return response()->json("パスワードリセットに失敗しました", 400)
               ->header('Content-Type','application/json; charset=UTF-8');
           }
-          return response()->json("パスワードを変更しました。", 201)
-          ->header('Content-Type','application/json; charset=UTF-8');
+          $token = $user->createToken('Auth Token')->accessToken;
+          return response()->json([
+             'name'=>$user->name,
+             'email'=>$user->email,
+             'access_token' => $token,
+             'token_type' => 'Bearer',
+         ],201)->header('Content-Type','application/json; charset=UTF-8');
     }
 }
