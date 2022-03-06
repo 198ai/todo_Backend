@@ -24,12 +24,16 @@ class RegisterController extends Controller
     // }
     public function signup(Request $request)
     {
-        $request->validate([
+        $data =[
             'name'=>'required|min:3|unique:users',
             'email'=>'required|email|unique:users',
             'password'=>'required|min:5'
-        ]);
-
+        ];
+        $validator = Validator::make($request->all(),$data);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 401)
+            ->header('Content-Type','application/json; charset=UTF-8');
+        }
         $user = new User([
             'name' => $request->name,
             'email' => $request->email,
