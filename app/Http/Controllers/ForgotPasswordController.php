@@ -53,7 +53,7 @@ class ForgotPasswordController extends Controller
         ];
         $saved = DB::table('password_resets')->insert($data);
         if (!$saved) {
-            return response()->json("DBへ書き込みを失敗しました。", 401)
+            return response()->json("DBへ書き込みに失敗しました。", 401)
             ->header('Content-Type','application/json; charset=UTF-8');
         }
         $send = Mail::send('emails.test',['key'=>$key],function($message){
