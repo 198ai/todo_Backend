@@ -349,14 +349,10 @@ public function deletemyevents(Request $request){
     foreach($data as $rows){
         //将array变成map
         $object1 = (object) $rows;
-      
-
         //查询日历里面有没，有就拿出ID 没有就添加日期
         if($object1->events !=null){
             foreach($object1->events as $row){
                 $object = (object) $row;
-
-                
                 $data=[
                     'eventTitle'=>$object->eventTitle,
                     'eventDescp'=>$object->eventDescp,
